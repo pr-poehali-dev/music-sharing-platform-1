@@ -19,6 +19,39 @@ const Index = () => {
   const [volume, setVolume] = useState([75]);
   const [searchQuery, setSearchQuery] = useState("");
   const [likedTracks, setLikedTracks] = useState<number[]>([]);
+  const [activeTab, setActiveTab] = useState<"popular" | "my-tracks">(
+    "popular",
+  );
+
+  const myTracks = [
+    {
+      id: 7,
+      title: "Моя первая композиция",
+      artist: "Вы",
+      duration: "3:12",
+      genre: "Original",
+      likes: 45,
+      plays: 234,
+    },
+    {
+      id: 8,
+      title: "Летний вайб",
+      artist: "Вы",
+      duration: "4:01",
+      genre: "Chill",
+      likes: 78,
+      plays: 512,
+    },
+    {
+      id: 9,
+      title: "Ночной драйв",
+      artist: "Вы",
+      duration: "3:45",
+      genre: "Electronic",
+      likes: 123,
+      plays: 890,
+    },
+  ];
 
   const tracks = [
     {
@@ -91,6 +124,15 @@ const Index = () => {
       track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       track.artist.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const filteredMyTracks = myTracks.filter(
+    (track) =>
+      track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      track.artist.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const currentTrackList =
+    activeTab === "popular" ? filteredTracks : filteredMyTracks;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-red-50">
@@ -170,29 +212,59 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Featured Tracks */}
+            {/* Tab Navigation */}
+            <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab("popular")}
+                className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                  activeTab === "popular"
+                    ? "bg-white text-red-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Icon name="TrendingUp" size={16} className="mr-2 inline" />
+                Популярные треки
+              </button>
+              <button
+                onClick={() => setActiveTab("my-tracks")}
+                className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                  activeTab === "my-tracks"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Icon name="User" size={16} className="mr-2 inline" />
+                Мои треки
+              </button>
+            </div>
+
+            {/* Track List */}
             <Card className="hover-lift">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center">
                     <Icon
-                      name="TrendingUp"
-                      className="mr-2 text-red-500"
+                      name={activeTab === "popular" ? "TrendingUp" : "User"}
+                      className={`mr-2 ${activeTab === "popular" ? "text-red-500" : "text-blue-500"}`}
                       size={24}
                     />
-                    Популярные треки
+                    {activeTab === "popular" ? "Популярные треки" : "Мои треки"}
                   </span>
                   <Badge
                     variant="secondary"
-                    className="bg-red-100 text-red-700"
+                    className={
+                      activeTab === "popular"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-blue-100 text-blue-700"
+                    }
                   >
-                    {filteredTracks.length} треков
+                    {currentTrackList.length} треков
                   </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {filteredTracks.map((track, index) => (
+                  {currentTrackList.map((track, index) => (
                     <div
                       key={track.id}
                       className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors group"
@@ -217,6 +289,18 @@ const Index = () => {
                         <span className="text-sm text-gray-500">
                           {track.duration}
                         </span>
+                        {activeTab === "my-tracks" && (
+                          <div className="flex items-center space-x-2">
+                            <Icon
+                              name="Eye"
+                              size={14}
+                              className="text-gray-500"
+                            />
+                            <span className="text-xs text-gray-500">
+                              {(track as any).plays}
+                            </span>
+                          </div>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -238,6 +322,15 @@ const Index = () => {
                           />
                           <span className="ml-1 text-xs">{track.likes}</span>
                         </Button>
+                        {activeTab === "my-tracks" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-orange-500 hover:text-orange-600"
+                          >
+                            <Icon name="Edit" size={16} />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -298,10 +391,10 @@ const Index = () => {
                     <Icon name="Music" className="text-white" size={48} />
                   </div>
                   <h3 className="font-semibold">
-                    {tracks[currentTrack]?.title || "Выберите трек"}
+                    {currentTrackList[currentTrack]?.title || "Выберите трек"}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {tracks[currentTrack]?.artist || "Артист"}
+                    {currentTrackList[currentTrack]?.artist || "Артист"}
                   </p>
                 </div>
                 <div className="space-y-4">
